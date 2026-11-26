@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -15,12 +15,13 @@
 
     <!-- Modules -->
     <modules>
-        <module>billing-microservices/eureka</module>
-        <module>billing-microservices/gateway1</module>
-        <module>billing-microservices/service-abonnements</module>
-        <module>billing-microservices/service-facturation</module>
-        <module>billing-microservices/service-clients</module>
-        <module>billing-microservices/config-server</module>
+        <module>eureka</module>
+        <module>gateway1</module>
+        <module>service-abonnements</module>
+        <module>service-facturation</module>
+        <module>service-clients</module>
+        <module>config-server</module>
+        <module>notification-service</module>
     </modules>
 
     <!-- Versions -->
