@@ -1,0 +1,245 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210" width="1500" height="1210" font-family="'Segoe UI','DejaVu Sans',Arial,sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#1d2b53" stroke-width="1.6"/>
+    </marker>
+    <marker id="dia" viewBox="0 0 14 10" refX="1" refY="5" markerWidth="14" markerHeight="10" orient="auto-start-reverse">
+      <path d="M1,5 L7,1 L13,5 L7,9 Z" fill="#1d2b53"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="1210" fill="#ffffff"/>
+  <text x="750" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#1d2b53">Bill-Flex — Diagramme de classes global</text>
+
+  <!-- ===== Packages ===== -->
+  <g fill="#f8fbff" stroke="#8fb4d9" stroke-width="2" rx="8">
+    <rect x="30" y="60" width="560" height="420" rx="8"/>
+    <rect x="640" y="60" width="830" height="420" rx="8"/>
+    <rect x="30" y="540" width="800" height="560" rx="8"/>
+    <rect x="860" y="540" width="330" height="560" rx="8"/>
+    <rect x="1210" y="540" width="260" height="560" rx="8"/>
+  </g>
+  <g font-size="18" font-weight="700" fill="#1d2b53" text-anchor="middle">
+    <text x="310" y="88">service-abonnements :8082</text>
+    <text x="1055" y="88">service-clients :8081</text>
+    <text x="430" y="568">service-facturation :8083</text>
+    <text x="1025" y="568">RabbitMQ</text>
+    <text x="1340" y="568">notification-service :8084</text>
+  </g>
+
+  <!-- ===== service-abonnements ===== -->
+  <g stroke="#222" stroke-width="2">
+    <!-- Plan -->
+    <rect x="55" y="110" width="210" height="152" rx="6" fill="#fdeefe"/>
+    <line x1="55" y1="144" x2="265" y2="144"/>
+    <!-- SubscriptionStatus -->
+    <rect x="55" y="295" width="210" height="108" rx="6" fill="#fff1dd"/>
+    <line x1="55" y1="329" x2="265" y2="329"/>
+    <!-- Subscription -->
+    <rect x="320" y="110" width="240" height="196" rx="6" fill="#e0f3fd"/>
+    <line x1="320" y1="144" x2="560" y2="144"/>
+  </g>
+  <g stroke="#222" stroke-width="1.5">
+    <circle cx="75" cy="127" r="10" fill="#a8dcb0"/>
+    <circle cx="75" cy="312" r="10" fill="#f4a98d"/>
+    <circle cx="340" cy="127" r="10" fill="#a8dcb0"/>
+  </g>
+  <g font-size="12" font-weight="700" fill="#1d2b53" text-anchor="middle">
+    <text x="75" y="131">C</text><text x="75" y="316">E</text><text x="340" y="131">C</text>
+  </g>
+  <g font-size="15" font-weight="700" fill="#1d2b53">
+    <text x="95" y="132">Plan</text>
+    <text x="95" y="317">SubscriptionStatus</text>
+    <text x="360" y="132">Subscription</text>
+  </g>
+  <g font-size="13" fill="#1d2b53">
+    <text x="67" y="166">-Long id</text><text x="67" y="188">-String nom</text><text x="67" y="210">-BigDecimal prixMensuel</text>
+    <text x="67" y="232">-int quotaUtilisateurs</text><text x="67" y="254">-boolean actif</text>
+    <text x="67" y="351">ACTIF</text><text x="67" y="373">SUSPENDU</text><text x="67" y="395">RESILIE</text>
+    <text x="332" y="166">-Long id</text><text x="332" y="188">-Long clientId</text><text x="332" y="210">-Plan plan</text>
+    <text x="332" y="232">-LocalDate dateDebut</text><text x="332" y="254">-LocalDate dateFin</text>
+    <text x="332" y="276">-LocalDate prochaineEcheance</text><text x="332" y="298">-SubscriptionStatus statut</text>
+  </g>
+
+  <!-- ===== service-clients ===== -->
+  <g stroke="#222" stroke-width="2">
+    <rect x="665" y="110" width="230" height="152" rx="6" fill="#e3f9ec"/>
+    <line x1="665" y1="144" x2="895" y2="144"/>
+    <rect x="665" y="295" width="230" height="108" rx="6" fill="#fff1dd"/>
+    <line x1="665" y1="329" x2="895" y2="329"/>
+    <rect x="950" y="110" width="240" height="174" rx="6" fill="#dcfaf3"/>
+    <line x1="950" y1="144" x2="1190" y2="144"/>
+    <rect x="1230" y="110" width="210" height="108" rx="6" fill="#fff1dd"/>
+    <line x1="1230" y1="144" x2="1440" y2="144"/>
+  </g>
+  <g stroke="#222" stroke-width="1.5">
+    <circle cx="685" cy="127" r="10" fill="#a8dcb0"/>
+    <circle cx="685" cy="312" r="10" fill="#f4a98d"/>
+    <circle cx="970" cy="127" r="10" fill="#a8dcb0"/>
+    <circle cx="1250" cy="127" r="10" fill="#f4a98d"/>
+  </g>
+  <g font-size="12" font-weight="700" fill="#1d2b53" text-anchor="middle">
+    <text x="685" y="131">C</text><text x="685" y="316">E</text><text x="970" y="131">C</text><text x="1250" y="131">E</text>
+  </g>
+  <g font-size="15" font-weight="700" fill="#1d2b53">
+    <text x="705" y="132">Client</text>
+    <text x="705" y="317">ModePaiement</text>
+    <text x="990" y="132">Payment</text>
+    <text x="1270" y="132">PaymentStatus</text>
+  </g>
+  <g font-size="13" fill="#1d2b53">
+    <text x="677" y="166">-Long id</text><text x="677" y="188">-String nom</text><text x="677" y="210">-String email «unique»</text>
+    <text x="677" y="232">-String numeroTva</text><text x="677" y="254">-ModePaiement modePaiement</text>
+    <text x="677" y="351">CARTE</text><text x="677" y="373">VIREMENT</text><text x="677" y="395">PRELEVEMENT</text>
+    <text x="962" y="166">-Long id</text><text x="962" y="188">-Long invoiceId</text><text x="962" y="210">-Long clientId</text>
+    <text x="962" y="232">-BigDecimal montant</text><text x="962" y="254">-PaymentStatus statut</text><text x="962" y="276">-LocalDateTime datePaiement</text>
+    <text x="1242" y="166">EN_ATTENTE</text><text x="1242" y="188">ENCAISSE</text><text x="1242" y="210">ANNULE</text>
+  </g>
+
+  <!-- ===== service-facturation ===== -->
+  <g stroke="#222" stroke-width="2">
+    <rect x="55" y="600" width="290" height="284" rx="6" fill="#fdeefe"/>
+    <line x1="55" y1="634" x2="345" y2="634"/>
+    <rect x="420" y="600" width="200" height="152" rx="6" fill="#e3f9ec"/>
+    <line x1="420" y1="634" x2="620" y2="634"/>
+    <rect x="420" y="790" width="200" height="152" rx="6" fill="#fff1dd"/>
+    <line x1="420" y1="824" x2="620" y2="824"/>
+    <rect x="650" y="700" width="160" height="64" rx="6" fill="#fdeefe"/>
+    <line x1="650" y1="734" x2="810" y2="734"/>
+  </g>
+  <g stroke="#222" stroke-width="1.5">
+    <circle cx="75" cy="617" r="10" fill="#a8dcb0"/>
+    <circle cx="440" cy="617" r="10" fill="#a8dcb0"/>
+    <circle cx="440" cy="807" r="10" fill="#f4a98d"/>
+    <circle cx="670" cy="717" r="10" fill="#a8dcb0"/>
+  </g>
+  <g font-size="12" font-weight="700" fill="#1d2b53" text-anchor="middle">
+    <text x="75" y="621">C</text><text x="440" y="621">C</text><text x="440" y="811">E</text><text x="670" y="721">C</text>
+  </g>
+  <g font-size="15" font-weight="700" fill="#1d2b53">
+    <text x="95" y="622">Invoice</text>
+    <text x="460" y="622">InvoiceLine</text>
+    <text x="460" y="812">InvoiceStatus</text>
+    <text x="690" y="722" font-size="13">InvoiceEventPublisher</text>
+  </g>
+  <g font-size="13" fill="#1d2b53">
+    <text x="67" y="656">-Long id</text><text x="67" y="678">-Long clientId</text><text x="67" y="700">-Long subscriptionId</text>
+    <text x="67" y="722">-String periode</text><text x="67" y="744">-InvoiceStatus statut</text><text x="67" y="766">-LocalDate dateEmission</text>
+    <text x="67" y="788">-LocalDate dateEcheance</text><text x="67" y="810">-BigDecimal montantHT</text>
+    <text x="67" y="832">-BigDecimal tva</text><text x="67" y="854">-BigDecimal montantTTC</text>
+    <text x="67" y="876">-List&lt;InvoiceLine&gt; lignes</text>
+    <text x="432" y="656">-Long id</text><text x="432" y="678">-String description</text><text x="432" y="700">-int quantite</text>
+    <text x="432" y="722">-BigDecimal prixUnitaire</text><text x="432" y="744">-BigDecimal montant</text>
+    <text x="432" y="846">BROUILLON</text><text x="432" y="868">EMISE</text><text x="432" y="890">PAYEE</text>
+    <text x="432" y="912">EN_RETARD</text><text x="432" y="934">ANNULEE</text>
+    <text x="662" y="753" font-style="italic" font-size="12">«RabbitMQ publisher»</text>
+  </g>
+
+  <!-- ===== Message RabbitMQ ===== -->
+  <g stroke="#222" stroke-width="2">
+    <rect x="885" y="700" width="280" height="240" rx="6" fill="#eceafe"/>
+    <line x1="885" y1="734" x2="1165" y2="734"/>
+  </g>
+  <circle cx="905" cy="717" r="10" fill="#c9b8f5" stroke="#222" stroke-width="1.5"/>
+  <text x="905" y="721" font-size="12" font-weight="700" fill="#1d2b53" text-anchor="middle">M</text>
+  <text x="925" y="722" font-size="15" font-weight="700" fill="#1d2b53">InvoiceEmittedEvent</text>
+  <g font-size="13" fill="#1d2b53">
+    <text x="897" y="753" font-style="italic" font-size="12">«message JSON»</text>
+    <text x="897" y="776">invoiceId : Long</text><text x="897" y="798">clientId : Long</text><text x="897" y="820">clientNom : String</text>
+    <text x="897" y="842">clientEmail : String</text><text x="897" y="864">periode : String</text><text x="897" y="886">montantTTC : BigDecimal</text>
+    <text x="897" y="908">dateEmission : LocalDate</text><text x="897" y="930">dateEcheance : LocalDate</text>
+  </g>
+  <g font-size="12" fill="#1d2b53">
+    <text x="885" y="985" font-weight="700">Exchange : billing.events (topic)</text>
+    <text x="885" y="1005">Routing key : invoice.emise</text>
+    <text x="885" y="1025">Queue : notification.invoice.queue</text>
+  </g>
+
+  <!-- ===== notification-service ===== -->
+  <g stroke="#222" stroke-width="2">
+    <rect x="1225" y="600" width="230" height="64" rx="6" fill="#fff1dd"/>
+    <line x1="1225" y1="634" x2="1455" y2="634"/>
+    <rect x="1225" y="700" width="230" height="262" rx="6" fill="#fff6e8"/>
+    <line x1="1225" y1="734" x2="1455" y2="734"/>
+    <rect x="1225" y="995" width="230" height="86" rx="6" fill="#fff1dd"/>
+    <line x1="1225" y1="1029" x2="1455" y2="1029"/>
+  </g>
+  <g stroke="#222" stroke-width="1.5">
+    <circle cx="1245" cy="617" r="10" fill="#a8dcb0"/>
+    <circle cx="1245" cy="717" r="10" fill="#a8dcb0"/>
+    <circle cx="1245" cy="1012" r="10" fill="#f4a98d"/>
+  </g>
+  <g font-size="12" font-weight="700" fill="#1d2b53" text-anchor="middle">
+    <text x="1245" y="621">C</text><text x="1245" y="721">C</text><text x="1245" y="1016">E</text>
+  </g>
+  <g font-size="15" font-weight="700" fill="#1d2b53">
+    <text x="1265" y="622" font-size="14">InvoiceEventListener</text>
+    <text x="1265" y="722">Notification</text>
+    <text x="1265" y="1017">NotificationStatus</text>
+  </g>
+  <g font-size="13" fill="#1d2b53">
+    <text x="1237" y="653" font-style="italic" font-size="12">«@RabbitListener»</text>
+    <text x="1237" y="756">-Long id</text><text x="1237" y="778">-Long invoiceId</text><text x="1237" y="800">-Long clientId</text>
+    <text x="1237" y="822">-String destinataire</text><text x="1237" y="844">-String sujet</text><text x="1237" y="866">-String contenu</text>
+    <text x="1237" y="888">-NotificationStatus statut</text><text x="1237" y="910">-String erreur</text>
+    <text x="1237" y="932">-LocalDateTime dateReception</text><text x="1237" y="954">-LocalDateTime dateEnvoi</text>
+    <text x="1237" y="1051">SENT</text><text x="1237" y="1073">FAILED</text>
+  </g>
+
+  <!-- ===== Relations internes (trait plein) ===== -->
+  <g stroke="#1d2b53" stroke-width="1.8" fill="none">
+    <line x1="265" y1="186" x2="320" y2="186" marker-end="url(#arr)"/>
+    <line x1="320" y1="276" x2="265" y2="330" marker-end="url(#arr)"/>
+    <line x1="780" y1="262" x2="780" y2="295" marker-end="url(#arr)"/>
+    <line x1="950" y1="200" x2="895" y2="200" marker-end="url(#arr)"/>
+    <line x1="1190" y1="170" x2="1230" y2="170" marker-end="url(#arr)"/>
+    <line x1="345" y1="680" x2="420" y2="680" marker-start="url(#dia)" marker-end="url(#arr)"/>
+    <line x1="345" y1="850" x2="420" y2="850" marker-end="url(#arr)"/>
+    <line x1="1340" y1="664" x2="1340" y2="700" marker-end="url(#arr)"/>
+    <line x1="1340" y1="962" x2="1340" y2="995" marker-end="url(#arr)"/>
+  </g>
+  <g font-size="12" fill="#1d2b53">
+    <text x="268" y="180">1</text><text x="304" y="180">*</text>
+    <text x="352" y="674">1</text><text x="392" y="674">1..*</text><text x="357" y="698" font-size="11">lignes</text>
+    <text x="358" y="844" font-size="11">statut</text>
+    <text x="900" y="194" font-size="11">clientId</text>
+    <text x="1347" y="685" font-size="11">crée</text>
+    <text x="1347" y="982" font-size="11">statut</text>
+  </g>
+
+  <!-- ===== Liens par identifiant inter-services (pointillés) ===== -->
+  <g stroke="#1d2b53" stroke-width="1.8" fill="none" stroke-dasharray="7 5">
+    <!-- Subscription.clientId -> Client -->
+    <line x1="560" y1="150" x2="665" y2="150" marker-end="url(#arr)"/>
+    <!-- Invoice.subscriptionId -> Subscription -->
+    <path d="M150,600 V500 H440 V306" marker-end="url(#arr)"/>
+    <!-- Invoice.clientId -> Client -->
+    <path d="M250,600 V515 H615 V225 H665" marker-end="url(#arr)"/>
+    <!-- Payment.invoiceId -> Invoice -->
+    <path d="M1070,284 V530 H300 V600" marker-end="url(#arr)"/>
+    <!-- Invoice -> Publisher -->
+    <path d="M200,884 V1060 H730 V764" marker-end="url(#arr)"/>
+    <!-- Publisher -> Event -->
+    <line x1="810" y1="732" x2="885" y2="732" marker-end="url(#arr)"/>
+    <!-- Event -> Listener -->
+    <line x1="1165" y1="740" x2="1225" y2="640" marker-end="url(#arr)"/>
+  </g>
+  <g font-size="11" fill="#1d2b53">
+    <text x="568" y="143">clientId</text>
+    <text x="162" y="494">subscriptionId</text>
+    <text x="470" y="510">clientId</text>
+    <text x="930" y="524">invoiceId</text>
+    <text x="330" y="1053">statut = EMISE</text>
+    <text x="817" y="725">publie</text>
+    <text x="1170" y="700">consomme</text>
+  </g>
+
+  <!-- ===== Légende ===== -->
+  <g>
+    <rect x="30" y="1120" width="720" height="74" rx="8" fill="#ffffff" stroke="#1d2b53" stroke-width="1.5"/>
+    <line x1="50" y1="1142" x2="110" y2="1142" stroke="#1d2b53" stroke-width="1.8" marker-end="url(#arr)"/>
+    <text x="125" y="1146" font-size="13" fill="#1d2b53">Relation interne au service</text>
+    <line x1="50" y1="1166" x2="110" y2="1166" stroke="#1d2b53" stroke-width="1.8" stroke-dasharray="7 5" marker-end="url(#arr)"/>
+    <text x="125" y="1170" font-size="13" fill="#1d2b53">Lien par identifiant inter-services / flux de message (pas de clé étrangère entre bases)</text>
+    <text x="30" y="1206" font-size="12" fill="#1d2b53">Notification.invoiceId et Notification.clientId sont des références distantes, alimentées par l'événement InvoiceEmittedEvent.</text>
+  </g>
+</svg>
