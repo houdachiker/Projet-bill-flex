@@ -1,0 +1,1586 @@
+{
+  "info": {
+    "name": "Billing Microservices - Examen (V1 a V6)",
+    "description": "Collection pre-enregistree pour valider chaque jalon de la grille d evaluation.\n\nORDRE : lancer les dossiers dans l ordre V1 -> V2&V3 -> V4 -> V5 -> V6 (Collection Runner). Les identifiants (clientId, planId, subscriptionId, invoiceId...) sont memorises automatiquement dans les variables de collection.\nDans V4, executer 4.7 avant V5 (la facture doit etre encore BROUILLON).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "V1 - Metier & modele de donnees (CRUD direct sur chaque service)",
+      "item": [
+        {
+          "name": "Clients (service-clients : 8081)",
+          "item": [
+            {
+              "name": "1.1 Creer un client (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{clients}}/clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Acme SARL\",\n  \"email\": \"acme{{$timestamp}}@mail.com\",\n  \"numeroTva\": \"FR123\",\n  \"modePaiement\": \"CARTE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                      "var c = pm.response.json();",
+                      "pm.collectionVariables.set(\"clientId\", c.id);",
+                      "pm.collectionVariables.set(\"periode\", \"P\" + Date.now());",
+                      "pm.test(\"id genere\", function () { pm.expect(c.id).to.be.a(\"number\"); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.2 Creer un 2eme client (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{clients}}/clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Beta SAS\",\n  \"email\": \"beta{{$timestamp}}@mail.com\",\n  \"modePaiement\": \"VIREMENT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.collectionVariables.set(\"clientId2\", pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.3 Client invalide -> validation DTO (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{clients}}/clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"\",\n  \"email\": \"pas-un-email\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });",
+                      "pm.test(\"message d erreur\", function () { pm.expect(pm.response.json().message).to.include(\"email\"); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.4 Lister les clients (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{clients}}/clients"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.5 Lire un client (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{clients}}/clients/{{clientId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"bon client\", function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"clientId\"))); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.6 Modifier un client (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{clients}}/clients/{{clientId}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Acme SARL (modifie)\",\n  \"email\": \"acme{{$timestamp}}@mail.com\",\n  \"numeroTva\": \"FR999\",\n  \"modePaiement\": \"PRELEVEMENT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"nom modifie\", function () { pm.expect(pm.response.json().nom).to.include(\"modifie\"); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.7 Client inexistant (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{clients}}/clients/99999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Plans (service-abonnements : 8082)",
+          "item": [
+            {
+              "name": "1.8 Creer un plan (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/plans",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Pro\",\n  \"prixMensuel\": 30,\n  \"quotaUtilisateurs\": 5,\n  \"actif\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.collectionVariables.set(\"planId\", pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.9 Plan invalide -> validation DTO (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/plans",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"\",\n  \"prixMensuel\": -5,\n  \"quotaUtilisateurs\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.10 Lister les plans (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/plans"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.11 Lire un plan (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/plans/{{planId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.12 Modifier un plan (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/plans/{{planId}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Pro\",\n  \"prixMensuel\": 35,\n  \"quotaUtilisateurs\": 10,\n  \"actif\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"prix modifie\", function () { pm.expect(pm.response.json().prixMensuel).to.eql(35); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.13 Plan inexistant (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/plans/99999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Abonnements (service-abonnements : 8082)",
+          "item": [
+            {
+              "name": "1.14 Creer un abonnement (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/subscriptions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"planId\": {{planId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.collectionVariables.set(\"subscriptionId\", pm.response.json().id);",
+                      "pm.test(\"statut ACTIF\", function () { pm.expect(pm.response.json().statut).to.eql(\"ACTIF\"); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.15 Lister les abonnements (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/subscriptions"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.16 Lire un abonnement (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/subscriptions/{{subscriptionId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.17 Abonnement invalide (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/subscriptions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"planId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Factures (service-facturation : 8083)",
+          "item": [
+            {
+              "name": "1.18 Creer une facture (201) - HT/TVA/TTC calcules",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{facturation}}/invoices",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"subscriptionId\": {{subscriptionId}},\n  \"periode\": \"{{periode}}\",\n  \"dateEcheance\": \"2026-12-05\",\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                      "pm.collectionVariables.set(\"invoiceId\", pm.response.json().id);",
+                      "var i = pm.response.json();",
+                      "pm.test(\"BROUILLON\", function () { pm.expect(i.statut).to.eql(\"BROUILLON\"); });",
+                      "pm.test(\"TTC = HT + TVA (20 %)\", function () { pm.expect(i.montantTTC).to.eql(i.montantHT + i.tva); pm.expect(i.tva).to.eql(i.montantHT * 0.2); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.19 Facture sans ligne -> validation DTO (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{facturation}}/invoices",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"lignes\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.20 Lister les factures (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/invoices"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "1.21 Lire une facture (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/invoices/{{invoiceId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "description": "Chaque service est appele directement sur son port : chacun a sa propre base H2 (Database per Service). Les corps de requete sont des DTO valides (400 si invalides)."
+    },
+    {
+      "name": "V2 & V3 - Eureka, Gateway, Config Server",
+      "item": [
+        {
+          "name": "2.1 Eureka : instances enregistrees et UP",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{eureka}}/eureka/apps"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var apps = pm.response.json().applications.application;",
+                  "var noms = apps.map(function (a) { return a.name; });",
+                  "[\"SERVICE-CLIENTS\", \"SERVICE-ABONNEMENTS\", \"SERVICE-FACTURATION\", \"NOTIFICATION-SERVICE\", \"GATEWAY-SERVICE\"].forEach(function (n) {",
+                  "  pm.test(n + \" enregistre et UP\", function () {",
+                  "    var a = apps.find(function (x) { return x.name === n; });",
+                  "    pm.expect(a, n + \" absent d Eureka\").to.exist;",
+                  "    pm.expect(a.instance[0].status).to.eql(\"UP\");",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.1 Config Server : config de service-clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{config}}/service-clients/default"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"port 8081 fourni par le Config Server\", function () { pm.expect(JSON.stringify(pm.response.json())).to.include(\"8081\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 Config Server : config de service-abonnements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{config}}/service-abonnements/default"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"port 8082\", function () { pm.expect(JSON.stringify(pm.response.json())).to.include(\"8082\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.3 Config Server : config de service-facturation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{config}}/service-facturation/default"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"port 8083 + rabbitmq\", function () { var s = JSON.stringify(pm.response.json()); pm.expect(s).to.include(\"8083\"); pm.expect(s).to.include(\"spring.rabbitmq.host\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.4 Config Server : config de notification-service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{config}}/notification-service/default"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"port 8084\", function () { pm.expect(JSON.stringify(pm.response.json())).to.include(\"8084\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.5 Config Server : config de gateway-service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{config}}/gateway-service/default"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"routes statiques\", function () { pm.expect(JSON.stringify(pm.response.json())).to.include(\"lb://service-clients\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Gateway - route STATIQUE : /clients -> service-clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/clients"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 Gateway - route STATIQUE : /plans -> service-abonnements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/plans"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 Gateway - route STATIQUE : /invoices -> service-facturation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/invoices"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.5 Gateway - route STATIQUE : /notifications -> notification-service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/notifications"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.6 Gateway - route DYNAMIQUE (Eureka) : /service-clients/clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/service-clients/clients"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.7 Load balancing : lancer 2 fois pour voir 2 ports differents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/service-clients/instance-info",
+            "description": "Lancer une 2eme instance : java -jar service-clients.jar --server.port=9081 --spring.cloud.config.enabled=false (ou dupliquer la configuration IntelliJ avec -Dserver.port=9081). Envoyer cette requete plusieurs fois : la reponse alterne entre 8081 et 9081."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "console.log(\"Instance qui a repondu : \" + pm.response.text());"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Pre-requis : Eureka (8761), Config Server (8888), services et gateway demarres."
+    },
+    {
+      "name": "V4 - Communication synchrone (OpenFeign)",
+      "item": [
+        {
+          "name": "4.1 Abonnement ENRICHI : abonnement + plan + client (Feign -> service-clients)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{abonnements}}/subscriptions/{{subscriptionId}}/details"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var d = pm.response.json();",
+                  "pm.test(\"abonnement + client agreges\", function () { pm.expect(d.subscription.id).to.exist; pm.expect(d.client.nom).to.be.a(\"string\"); pm.expect(d.client.email).to.include(\"@\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Facture ENRICHIE : facture + client + abonnement/plan (2 appels Feign)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{facturation}}/invoices/{{invoiceId}}/details"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var d = pm.response.json();",
+                  "pm.test(\"facture + client + abonnement agreges\", function () { pm.expect(d.invoice.id).to.exist; pm.expect(d.client.nom).to.be.a(\"string\"); pm.expect(d.subscription.plan.nom).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 Validation prealable : abonnement pour un client INCONNU (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{abonnements}}/subscriptions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": 99999,\n  \"planId\": {{planId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"message\", function () { pm.expect(pm.response.json().message).to.include(\"Client introuvable\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.4 Validation prealable : facture pour un client INCONNU (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{facturation}}/invoices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": 99999,\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.5 Validation prealable : facture pour un abonnement INCONNU (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{facturation}}/invoices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": {{clientId}},\n  \"subscriptionId\": 99999,\n  \"periode\": \"X\",\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.6 Coherence : abonnement d un AUTRE client (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{facturation}}/invoices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": {{clientId2}},\n  \"subscriptionId\": {{subscriptionId}},\n  \"periode\": \"AUTRE-{{$timestamp}}\",\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"message\", function () { pm.expect(pm.response.json().message).to.include(\"n'appartient pas\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.7 Coherence : paiement sur facture BROUILLON (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{clients}}/payments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": {{clientId}},\n  \"invoiceId\": {{invoiceId}},\n  \"montant\": 36\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "service-clients interroge service-facturation par Feign : seule une facture EMISE ou EN_RETARD est payable. A lancer AVANT 5.1 (emission de la facture)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.8 Validation prealable : paiement sur facture INCONNUE (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{clients}}/payments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": {{clientId}},\n  \"invoiceId\": 99999,\n  \"montant\": 36\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Les DTO dedies (ClientDTO, SubscriptionDTO, InvoiceDTO...) sont dans chaque service ; les appels passent par Eureka (nom du service)."
+    },
+    {
+      "name": "V5 - Asynchrone (RabbitMQ + notification-service)",
+      "item": [
+        {
+          "name": "5.1 DECLENCHEUR : emettre la facture (BROUILLON -> EMISE) => evenement publie",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{facturation}}/invoices/{{invoiceId}}/status?statut=EMISE",
+            "description": "Console facturation : [PUBLISHER] Evenement facture EMISE publie dans RabbitMQ. Console RabbitMQ : http://localhost:15672 (guest/guest), queue notification.invoice.queue."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"statut EMISE\", function () { pm.expect(pm.response.json().statut).to.eql(\"EMISE\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 CONFIRMATION : le consumer a traite le message et envoye le mail (SENT)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification}}/notifications/invoice/{{invoiceId}}",
+            "description": "Le mail reçu est visible dans MailHog : http://localhost:8025"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(function () {}, 2500);  // laisse 2,5 s au consumer pour traiter le message"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "var n = pm.response.json();",
+                  "pm.test(\"une notification existe\", function () { pm.expect(n.length).to.be.above(0); });",
+                  "pm.test(\"mail ENVOYE (SENT)\", function () { pm.expect(n[0].statut).to.eql(\"SENT\"); pm.expect(n[0].destinataire).to.include(\"@\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Creer un paiement sur la facture EMISE (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{clients}}/payments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": {{clientId}},\n  \"invoiceId\": {{invoiceId}},\n  \"montant\": 36\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"paymentId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.4 Encaisser le paiement (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{clients}}/payments/{{paymentId}}/encaisser"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"ENCAISSE\", function () { pm.expect(pm.response.json().statut).to.eql(\"ENCAISSE\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.5 Facture -> PAYEE (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{facturation}}/invoices/{{invoiceId}}/status?statut=PAYEE"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.6 Toutes les notifications (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification}}/notifications"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Pre-requis : docker compose up -d (RabbitMQ + MailHog), puis notification-service demarre."
+    },
+    {
+      "name": "V6 - Resilience, erreurs, idempotence",
+      "item": [
+        {
+          "name": "Idempotence des creations",
+          "item": [
+            {
+              "name": "6.1 Rejouer la creation de la FACTURE -> 200 + Idempotent-Replay (pas de doublon)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{facturation}}/invoices",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"subscriptionId\": {{subscriptionId}},\n  \"periode\": \"{{periode}}\",\n  \"dateEcheance\": \"2026-12-05\",\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"en-tete Idempotent-Replay\", function () { pm.response.to.have.header(\"Idempotent-Replay\", \"true\"); });",
+                      "pm.test(\"meme facture renvoyee\", function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"invoiceId\"))); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.2 Rejouer la creation de l ABONNEMENT -> 200 + Idempotent-Replay",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{abonnements}}/subscriptions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"planId\": {{planId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "pm.test(\"en-tete Idempotent-Replay\", function () { pm.response.to.have.header(\"Idempotent-Replay\", \"true\"); });",
+                      "pm.test(\"meme abonnement renvoye\", function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"subscriptionId\"))); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.3 Verification : toujours UNE seule facture pour cet abonnement/periode",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/invoices"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "var l = pm.response.json().filter(function (i) { return i.periode === pm.collectionVariables.get(\"periode\"); });",
+                      "pm.test(\"1 seule facture\", function () { pm.expect(l.length).to.eql(1); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Gestion centralisee des erreurs (@RestControllerAdvice)",
+          "item": [
+            {
+              "name": "6.4 Transition interdite : PAYEE -> ANNULEE (409)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{facturation}}/invoices/{{invoiceId}}/status?statut=ANNULEE"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 409\", function () { pm.response.to.have.status(409); });",
+                      "pm.test(\"format uniforme\", function () { var j = pm.response.json(); pm.expect(j).to.have.all.keys(\"timestamp\", \"status\", \"error\", \"message\"); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.5 Valeur d enum invalide (400)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{facturation}}/invoices/{{invoiceId}}/status?statut=BLABLA"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.6 JSON mal forme (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{clients}}/clients",
+                "description": "Corps volontairement invalide : { nom : ",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ nom : ",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 400\", function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.7 Ressource inexistante (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/invoices/99999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 404\", function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Circuit Breaker + Retry + Timeout (MANUEL : arreter service-clients)",
+          "item": [
+            {
+              "name": "6.8 [service-clients ARRETE] creer une facture -> retry puis 503",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{facturation}}/invoices",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": {{clientId}},\n  \"periode\": \"CB-{{$timestamp}}\",\n  \"lignes\": [\n    {\n      \"description\": \"Plan Pro - novembre\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 30\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "1) Arreter service-clients. 2) Envoyer cette requete : le 1er appel retente 3 fois (500 ms entre chaque) puis renvoie 503. 3) Apres quelques echecs le circuit passe a OPEN : reponse immediate 503 'circuit breaker ouvert'."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"503 : service distant indisponible\", function () { pm.expect(pm.response.code).to.eql(503); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.9 Etat des circuit breakers de facturation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/actuator/circuitbreakers",
+                "description": "clientService doit etre OPEN apres plusieurs echecs ; il repasse en HALF_OPEN apres 15 s puis CLOSED des que le service repond."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });",
+                      "console.log(JSON.stringify(pm.response.json().circuitBreakers, null, 2));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.10 Etat du circuit breaker d abonnements",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{abonnements}}/actuator/circuitbreakers"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6.11 Retries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{facturation}}/actuator/retries"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Statut 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "description": "Dossier a executer a la main (pas dans le Collection Runner) : il suppose que service-clients est arrete."
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "gateway",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "eureka",
+      "value": "http://localhost:8761"
+    },
+    {
+      "key": "config",
+      "value": "http://localhost:8888"
+    },
+    {
+      "key": "clients",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "abonnements",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "facturation",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "notification",
+      "value": "http://localhost:8084"
+    }
+  ]
+}
