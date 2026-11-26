@@ -75,9 +75,9 @@ Autres dossiers : `database/init-mysql.sh` (création des bases et utilisateurs)
 
 ## 4. Diagramme de classes global
 
-Diagramme aligné sur les entités du code (`model/` de chaque service), notification-service inclus.
+Diagramme aligné sur les entités du code (`model/` de chaque service).
 Trait plein : relation **interne** au service ; pointillé : **lien par identifiant** entre services (aucune clé étrangère
-entre bases, validation par OpenFeign) ou flux de message RabbitMQ.
+entre bases, validation par OpenFeign).
 
 ![Diagramme de classes global](docs/diagramme-classes.svg)
 
@@ -86,7 +86,6 @@ entre bases, validation par OpenFeign) ou flux de message RabbitMQ.
 - `Invoice` : unicité `(subscriptionId, periode)` → une seule facture par abonnement et par période (idempotence).
 - `Invoice.statut` suit une machine à états : BROUILLON → EMISE → PAYEE / EN_RETARD, ANNULEE possible avant paiement (`InvoiceStatus.canTransitionTo`).
 - `Payment.clientId` référence un `Client` **local** ; `Payment.invoiceId` référence une facture **distante** (service-facturation).
-- `Notification.invoiceId` / `clientId` sont des références distantes, alimentées par `InvoiceEmittedEvent`.
 
 ---
 
